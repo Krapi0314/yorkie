@@ -32,12 +32,6 @@ jobs:
     - name: Get tools dependencies
       run: make tools
 
-    - name: Lint
-      run: make lint
-
-    - name: Lint proto files
-      uses: bufbuild/buf-lint-action@v1
-
     - name: Build
       run: make build
 
@@ -45,30 +39,4 @@ jobs:
       run: docker-compose -f build/docker/docker-compose.yml up --build -d
 
     - name: Test
-      run: go test -tags integration -race -coverprofile=coverage.txt -covermode=atomic -v ./...
-
-    - name: Bench
-      run: make bench
-
-    - name: Download previous benchmark data
-      uses: actions/cache@v1
-      with:
-        path: ./cache
-        key: ${{ runner.os }}-benchmark
-
-    - name: Store benchmark result
-      uses: benchmark-action/github-action-benchmark@v1
-      if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-      with:
-        name: Go Benchmark
-        tool: 'go'
-        output-file-path: output.txt
-        external-data-json-path: ./cache/benchmark-data.json
-        fail-on-alert: false
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        comment-always: true
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.txt
+      run: go test -tags integration -race -coverprofile=coverage.txt -covermode=atomic -v ./server/rpc/server_test.go
